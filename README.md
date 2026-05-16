@@ -43,3 +43,5 @@ Because **mindtyper** is built entirely inside a single standalone document, dep
 * **Enter Key (During Input Entry):** Submits form data, spawns a new node into random coordinates on the board, and clears the input area cleanly.
 * **Enter Key (During Inline Card Editing):** Instantly confirms typography alterations, saves the output data string, and cleanly blurs cursor focus away from the active block.
 * **Clear Button:** Wipes the entire local memory landscape and clears out your canvas playground following a secure browser verification prompt.
+
+(my first real vibecoded webapp, written with gemini)
