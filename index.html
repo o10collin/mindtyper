@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mindtyper</title>
+
+    <script src="https://cloudflare.com" referrerpolicy="no-referrer"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+        :root {
+            --bg-canvas: #0a0a0a;
+            --bg-ui: #141414;
+            --bg-ui-light: #1f1f1f;
+            --border-color: #222222;
+            --border-color-light: #444444;
+            --text-color: #ffffff;
+            --text-muted: #666666;
+            --grid-color: rgba(255, 255, 255, 0.05);
+            --grid-size: 28px;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-canvas);
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 500;
+            overflow: hidden;
+            color: var(--text-color);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 26px;
+            background-color: var(--bg-ui);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            z-index: 100;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 40px);
+            max-width: 1250px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.4);
+            box-sizing: border-box;
+        }
+
+        .logo {
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            text-transform: uppercase;
+            color: #ffffff;
+        }
+
+        .nav-controls-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .navbar-lang-select {
+            background-color: var(--bg-canvas);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #cccccc;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 0 10px;
+            height: 40px;
+            cursor: pointer;
+            outline: none;
+            box-sizing: border-box;
+            transition: all 0.15s ease;
+            appearance: none;
+            -webkit-appearance: none;
+            text-align: center;
+        }
+
+        .navbar-lang-select:hover {
+            border-color: var(--border-color-light);
+            color: var(--text-color);
+            background-color: var(--bg-ui-light);
+        }
+
+        .navbar-grid-controls {
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-canvas);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 4px;
+            gap: 4px;
+        }
+
+        .navbar-grid-btn {
+            width: 32px;
+            height: 32px;
+            background-color: transparent;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            cursor: pointer;
+            box-sizing: border-box;
+            transition: all 0.15s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .navbar-grid-btn:hover {
+            border-color: var(--border-color-light);
+            background-color: var(--bg-ui-light);
+        }
+
+        .navbar-grid-btn.active {
+            border-color: #666666;
+            background-color: var(--bg-ui-light);
+        }
+
+        .navbar-grid-btn.btn-dots::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image: radial-gradient(var(--text-muted) 1.5px, transparent 1.5px);
+            background-size: 6px 6px;
+            opacity: 0.6;
+            transition: opacity 0.15s ease;
+        }
+
+        .navbar-grid-btn.btn-dots:hover::before,
+        .navbar-grid-btn.btn-dots.active::before {
+            opacity: 1;
+            background-image: radial-gradient(#ccc 1.5px, transparent 1.5px);
+        }
+
+        .navbar-grid-btn.btn-lines::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-image:
+                linear-gradient(var(--text-muted) 1px, transparent 1px),
+                linear-gradient(90deg, var(--text-muted) 1px, transparent 1px);
+            background-size: 8px 8px;
+            background-position: -0.5px -0.5px;
+            opacity: 0.6;
+            transition: opacity 0.15s ease;
+        }
+
+        .navbar-grid-btn.btn-lines:hover::before,
+        .navbar-grid-btn.btn-lines.active::before {
+            opacity: 1;
+            background-image:
+                linear-gradient(#ccc 1px, transparent 1px),
+                linear-gradient(90deg, #ccc 1px, transparent 1px);
+        }
+
+        .nav-buttons {
+            display: flex;
+            align-items: center;
+        }
+
+        .nav-buttons button {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: #cccccc;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 8px 18px;
+            cursor: pointer;
+            margin-left: 8px;
+            font-family: 'Montserrat', sans-serif;
+            transition: all 0.15s ease;
+        }
+
+        .nav-buttons button:hover {
+            background-color: var(--bg-ui-light);
+            border-color: var(--border-color-light);
+            color: var(--text-color);
+        }
+
+        .nav-buttons button.clear-btn-ui {
+            color: #ff6666;
+            border-color: rgba(255, 85, 85, 0.25);
+        }
+
+        .nav-buttons button.clear-btn-ui:hover {
+            background-color: rgba(255, 85, 85, 0.1);
+            border-color: rgba(255, 85, 85, 0.4);
+            color: #ff7777;
+        }
+
+        #canvasWorkspace {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            background-color: var(--bg-canvas);
+            background-image: none;
+            background-size: var(--grid-size) var(--grid-size);
+        }
+
+        @keyframes bubblePopIn {
+            0% {
+                transform: scale(0.85);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .thought-bubble {
+            position: absolute;
+            background-color: var(--bg-ui);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 14px 18px;
+            max-width: 320px;
+            min-width: 160px;
+            cursor: move;
+            user-select: none;
+            word-wrap: break-word;
+            font-family: 'JetBrains Mono', Menlo, Monaco, monospace;
+            font-size: 15px;
+            font-weight: 500;
+            line-height: 1.6;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.5);
+            outline: none;
+            z-index: 2;
+            box-sizing: border-box;
+            animation: bubblePopIn 0.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+            transition: background-color 0.2s ease, border-color 0.2s ease;
+        }
+
+        .thought-bubble:has(.thought-text:empty) {
+            min-height: 48px;
+        }
+
+        .thought-bubble.highlighted {
+            background-color: var(--bg-ui-light);
+            border-color: #555555;
+        }
+
+        .thought-bubble:focus-within {
+            border-color: #777777;
+        }
+
+        .thought-text {
+            outline: none;
+            display: inline-block;
+            min-width: 20px;
+            min-height: 22px;
+        }
+
+        .thought-text:empty::before {
+            content: '\200B';
+        }
+
+        .input-container {
+            position: fixed;
+            bottom: 28px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 540px;
+            display: flex;
+            align-items: center;
+            background-color: var(--bg-ui);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 6px 10px;
+            box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6);
+            z-index: 100;
+        }
+
+        .input-container input {
+            flex: 1;
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-family: 'Montserrat', sans-serif;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 10px 14px;
+        }
+
+        .input-container input:focus {
+            outline: none;
+        }
+
+        .input-container input::placeholder {
+            color: #444444;
+        }
+
+        .send-btn {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            transition: color 0.15s ease;
+        }
+
+        .send-btn:hover {
+            color: #cccccc;
+        }
+
+        .send-btn svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .context-menu {
+            position: absolute;
+            background-color: var(--bg-ui);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 6px 0;
+            z-index: 1000;
+            box-shadow: 0 12px 36px rgba(0,0,0,0.6);
+            display: none;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .context-menu-item {
+            padding: 8px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            color: #cccccc;
+            transition: all 0.1s ease;
+        }
+
+        .context-menu-item:hover {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .context-menu-item.delete {
+            color: #ff6666;
+        }
+
+        .context-menu-item.delete:hover {
+            background-color: rgba(255, 85, 85, 0.1);
+            color: #ff7777;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <div class="logo">MindTyper</div>
+
+        <div class="nav-controls-wrapper">
+
+            <select class="navbar-lang-select" id="langSelect" onchange="changeLanguage(this.value)">
+                <option value="en" selected>EN</option>
+                <option value="de">DE</option>
+            </select>
+
+            <div class="navbar-grid-controls">
+                <div class="navbar-grid-btn btn-none active" id="btnGridNone" onclick="setGridStyle('none')" title="Solid Dark Void"></div>
+                <div class="navbar-grid-btn btn-dots" id="btnGridDots" onclick="setGridStyle('dots')" title="Dotted Matrix"></div>
+                <div class="navbar-grid-btn btn-lines" id="btnGridLines" onclick="setGridStyle('lines')" title="Drafting Grid"></div>
+            </div>
+
+            <div class="nav-buttons">
+                <button onclick="exportToPNG()" id="btnExport">Export</button>
+                <button onclick="saveThoughts()" id="btnSave">Save</button>
+                <button onclick="loadThoughts()" id="btnLoad">Load</button>
+                <button class="clear-btn-ui" onclick="clearCanvas()" id="btnClear">Clear</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="canvasWorkspace"></div>
+
+    <form class="input-container" id="thoughtForm" onsubmit="createThought(event)">
+        <input type="text" id="thoughtInput" placeholder="Write a thought..." autocomplete="off">
+
+        <button type="submit" class="send-btn">
+            <svg xmlns="http://w3.org" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M3.105 2.288a.75.75 0 0 0-.826.95l1.414 4.926A1.5 1.5 0 0 0 5.135 9.25h6.115a.75.75 0 0 1 0 1.5H5.135a1.5 1.5 0 0 0-1.442 1.086l-1.414 4.926a.75.75 0 0 0 .826.95 28.897 28.897 0 0 0 15.293-7.155.75.75 0 0 0 0-1.114A28.897 28.897 0 0 0 3.105 2.288Z" />
+            </svg>
+        </button>
+    </form>
+
+    <div id="customContextMenu" class="context-menu">
+        <div class="context-menu-item" id="ctxEdit">Edit</div>
+        <div class="context-menu-item" id="ctxToggleColor">Highlight</div>
+        <div class="context-menu-item delete" id="ctxDelete">Delete</div>
+    </div>
+
+    <script>
+        const canvasWorkspace = document.getElementById('canvasWorkspace');
+        const input = document.getElementById('thoughtInput');
+        const contextMenu = document.getElementById('customContextMenu');
+        const toggleColorBtn = document.getElementById('ctxToggleColor');
+
+        let rightClickedElement = null;
+        let currentGridSize = 28;
+        let gridMode = 'none';
+        let currentLang = 'en';
+
+        const translations = {
+            en: {
+                placeholder: "Write a thought...",
+                export: "Export",
+                save: "Save",
+                load: "Load",
+                clear: "Clear",
+                edit: "Edit",
+                highlight: "Highlight",
+                unhighlight: "Unhighlight",
+                delete: "Delete",
+                clearPrompt: "Are you sure you want to clear your current board?"
+            },
+            de: {
+                placeholder: "Schreib einen Gedanken auf...",
+                export: "Exportieren",
+                save: "Speichern",
+                load: "Laden",
+                clear: "Leeren",
+                edit: "Bearbeiten",
+                highlight: "Hervorheben",
+                unhighlight: "Hervorhebung aufheben",
+                delete: "Löschen",
+                clearPrompt: "Sicher, dass du das aktuelle Board leeren möchtest?"
+            }
+        };
+
+        function generateId() {
+            return 'node_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang;
+
+            document.getElementById('thoughtInput').placeholder = translations[lang].placeholder;
+            document.getElementById('btnExport').innerText = translations[lang].export;
+            document.getElementById('btnSave').innerText = translations[lang].save;
+            document.getElementById('btnLoad').innerText = translations[lang].load;
+            document.getElementById('btnClear').innerText = translations[lang].clear;
+            document.getElementById('ctxEdit').innerText = translations[lang].edit;
+            document.getElementById('ctxDelete').innerText = translations[lang].delete;
+
+            if (rightClickedElement) {
+                const isHighlighted = rightClickedElement.classList.contains('highlighted');
+
+                toggleColorBtn.innerText = isHighlighted
+                    ? translations[lang].unhighlight
+                    : translations[lang].highlight;
+            } else {
+                toggleColorBtn.innerText = translations[lang].highlight;
+            }
+
+            saveThoughts();
+        }
+
+        function setGridStyle(mode) {
+            gridMode = mode;
+            updateBackgroundStyles();
+            saveThoughts();
+        }
+
+        function updateBackgroundStyles() {
+            document.documentElement.style.setProperty('--grid-size', `${currentGridSize}px`);
+
+            document.getElementById('btnGridDots').classList.remove('active');
+            document.getElementById('btnGridLines').classList.remove('active');
+            document.getElementById('btnGridNone').classList.remove('active');
+
+            if (gridMode === 'dots') {
+                canvasWorkspace.style.backgroundImage =
+                    'radial-gradient(var(--grid-color) 1.8px, transparent 1.8px)';
+
+                document.getElementById('btnGridDots').classList.add('active');
+
+            } else if (gridMode === 'lines') {
+
+                canvasWorkspace.style.backgroundImage =
+                    'linear-gradient(var(--grid-color) 1px, transparent 1px), linear-gradient(90deg, var(--grid-color) 1px, transparent 1px)';
+
+                document.getElementById('btnGridLines').classList.add('active');
+
+            } else {
+                canvasWorkspace.style.backgroundImage = 'none';
+                document.getElementById('btnGridNone').classList.add('active');
+            }
+        }
+
+        function createThought(event) {
+            if (event) event.preventDefault();
+
+            const text = input.value.trim();
+
+            if (text === "") return;
+
+            const minX = 120;
+            const maxX = canvasWorkspace.clientWidth - 340;
+            const minY = 140;
+            const maxY = canvasWorkspace.clientHeight - 160;
+
+            const randomX =
+                Math.floor(Math.random() * (maxX - minX + 1)) + minX;
+
+            const randomY =
+                Math.floor(Math.random() * (maxY - minY + 1)) + minY;
+
+            spawnBubble(generateId(), text, randomX, randomY, false);
+
+            input.value = "";
+
+            saveThoughts();
+        }
+
+        canvasWorkspace.addEventListener('dblclick', (e) => {
+            if (e.target !== canvasWorkspace) return;
+
+            let targetX = e.clientX - 80;
+            let targetY = e.clientY - 24;
+
+            if (targetX < 120) targetX = 120;
+            if (targetY < 140) targetY = 140;
+
+            if (targetX > canvasWorkspace.clientWidth - 180) {
+                targetX = canvasWorkspace.clientWidth - 180;
+            }
+
+            if (targetY > canvasWorkspace.clientHeight - 120) {
+                targetY = canvasWorkspace.clientHeight - 120;
+            }
+
+            const id = generateId();
+
+            spawnBubble(id, "", targetX, targetY, false);
+
+            const bubble = document.getElementById(id);
+            const textSpan = bubble.querySelector('.thought-text');
+
+            textSpan.setAttribute('contenteditable', 'true');
+            textSpan.focus();
+
+            textSpan.addEventListener('blur', function blurHandler() {
+                textSpan.removeAttribute('contenteditable');
+
+                if (textSpan.innerText.trim() === "") {
+                    bubble.remove();
+                }
+
+                saveThoughts();
+
+                textSpan.removeEventListener('blur', blurHandler);
+            });
+
+            saveThoughts();
+        });
+
+        function spawnBubble(id, text, x, y, isHighlighted = false) {
+            const bubble = document.createElement('div');
+
+            bubble.classList.add('thought-bubble');
+            bubble.id = id;
+            bubble.style.left = `${x}px`;
+            bubble.style.top = `${y}px`;
+
+            if (isHighlighted) {
+                bubble.classList.add('highlighted');
+            }
+
+            const textSpan = document.createElement('span');
+
+            textSpan.classList.add('thought-text');
+            textSpan.innerText = text;
+
+            bubble.appendChild(textSpan);
+
+            makeDraggable(bubble);
+            attachContextMenu(bubble);
+
+            textSpan.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    textSpan.blur();
+                }
+            });
+
+            canvasWorkspace.appendChild(bubble);
+        }
+
+        function makeDraggable(element) {
+            let pos1 = 0;
+            let pos2 = 0;
+            let pos3 = 0;
+            let pos4 = 0;
+
+            let hasDragged = false;
+
+            element.onmousedown = dragMouseDown;
+
+            function dragMouseDown(e) {
+                if (
+                    e.target.getAttribute('contenteditable') === 'true' ||
+                    e.button === 2
+                ) return;
+
+                element.style.animation = "none";
+
+                e.preventDefault();
+
+                hasDragged = false;
+
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+
+                document.onmouseup = closeDragElement;
+                document.onmousemove = elementDrag;
+            }
+
+            function elementDrag(e) {
+                e.preventDefault();
+
+                hasDragged = true;
+
+                pos1 = pos3 - e.clientX;
+                pos2 = pos4 - e.clientY;
+
+                pos3 = e.clientX;
+                pos4 = e.clientY;
+
+                let newTop = element.offsetTop - pos2;
+                let newLeft = element.offsetLeft - pos1;
+
+                if (newTop < 0) newTop = 0;
+                if (newLeft < 0) newLeft = 0;
+
+                if (newTop > canvasWorkspace.clientHeight - element.clientHeight) {
+                    newTop = canvasWorkspace.clientHeight - element.clientHeight;
+                }
+
+                if (newLeft > canvasWorkspace.clientWidth - element.clientWidth) {
+                    newLeft = canvasWorkspace.clientWidth - element.clientWidth;
+                }
+
+                element.style.top = newTop + "px";
+                element.style.left = newLeft + "px";
+            }
+
+            function closeDragElement() {
+                document.onmouseup = null;
+                document.onmousemove = null;
+
+                if (hasDragged) {
+                    saveThoughts();
+                }
+            }
+        }
+
+        function attachContextMenu(element) {
+            element.addEventListener('contextmenu', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+
+                rightClickedElement = element;
+
+                const isHighlighted =
+                    element.classList.contains('highlighted');
+
+                toggleColorBtn.innerText = isHighlighted
+                    ? translations[currentLang].unhighlight
+                    : translations[currentLang].highlight;
+
+                contextMenu.style.display = 'block';
+                contextMenu.style.left = `${e.clientX}px`;
+                contextMenu.style.top = `${e.clientY}px`;
+            });
+        }
+
+        function dismissMenu() {
+            contextMenu.style.display = 'none';
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.context-menu')) {
+                dismissMenu();
+            }
+        });
+
+        document.getElementById('ctxDelete').addEventListener('click', () => {
+            if (rightClickedElement) {
+                rightClickedElement.remove();
+                rightClickedElement = null;
+
+                saveThoughts();
+            }
+
+            dismissMenu();
+        });
+
+        toggleColorBtn.addEventListener('click', () => {
+            if (rightClickedElement) {
+                rightClickedElement.classList.toggle('highlighted');
+
+                const isHighlighted =
+                    rightClickedElement.classList.contains('highlighted');
+
+                toggleColorBtn.innerText = isHighlighted
+                    ? translations[currentLang].unhighlight
+                    : translations[currentLang].highlight;
+
+                rightClickedElement = null;
+
+                saveThoughts();
+            }
+
+            dismissMenu();
+        });
+
+        document.getElementById('ctxEdit').addEventListener('click', () => {
+            if (rightClickedElement) {
+                const textSpan =
+                    rightClickedElement.querySelector('.thought-text');
+
+                textSpan.setAttribute('contenteditable', 'true');
+                textSpan.focus();
+
+                const range = document.createRange();
+                const sel = window.getSelection();
+
+                range.selectNodeContents(textSpan);
+                range.collapse(false);
+
+                sel.removeAllRanges();
+                sel.addRange(range);
+
+                textSpan.addEventListener('blur', function blurHandler() {
+                    textSpan.removeAttribute('contenteditable');
+
+                    saveThoughts();
+
+                    textSpan.removeEventListener('blur', blurHandler);
+                });
+            }
+
+            dismissMenu();
+        });
+
+        function clearCanvas() {
+            if (confirm(translations[currentLang].clearPrompt)) {
+                const bubbles =
+                    canvasWorkspace.querySelectorAll('.thought-bubble');
+
+                bubbles.forEach(b => b.remove());
+
+                saveThoughts();
+            }
+        }
+
+        function exportToPNG() {
+            domtoimage.toPng(canvasWorkspace, {
+                width: canvasWorkspace.clientWidth,
+                height: canvasWorkspace.clientHeight
+            })
+            .then(function (dataUrl) {
+                const link = document.createElement('a');
+
+                link.download = `mindtyper-export-${Date.now()}.png`;
+                link.href = dataUrl;
+
+                link.click();
+            })
+            .catch(function (error) {
+                console.error('Export failed:', error);
+            });
+        }
+
+        function saveThoughts() {
+            const bubbles =
+                canvasWorkspace.querySelectorAll('.thought-bubble');
+
+            const data = [];
+
+            bubbles.forEach(b => {
+                data.push({
+                    id: b.id,
+                    text: b.querySelector('.thought-text').innerText,
+                    x: parseInt(b.style.left),
+                    y: parseInt(b.style.top),
+                    highlighted: b.classList.contains('highlighted')
+                });
+            });
+
+            const config = {
+                bubbles: data,
+                gridSize: currentGridSize,
+                gridMode: gridMode,
+                lang: currentLang
+            };
+
+            localStorage.setItem(
+                'mindtyper_stable_data',
+                JSON.stringify(config)
+            );
+        }
+
+        function loadThoughts() {
+            const data =
+                localStorage.getItem('mindtyper_stable_data');
+
+            if (!data) {
+                updateBackgroundStyles();
+                return;
+            }
+
+            const bubbles =
+                canvasWorkspace.querySelectorAll('.thought-bubble');
+
+            bubbles.forEach(b => b.remove());
+
+            const parsed = JSON.parse(data);
+
+            if (parsed.bubbles) {
+
+                currentGridSize = parsed.gridSize || 28;
+                gridMode = parsed.gridMode || 'none';
+
+                const loadedLang = parsed.lang || 'en';
+
+                document.getElementById('langSelect').value = loadedLang;
+
+                changeLanguage(loadedLang);
+                updateBackgroundStyles();
+
+                parsed.bubbles.forEach(item => {
+                    spawnBubble(
+                        item.id,
+                        item.text,
+                        item.x,
+                        item.y,
+                        item.highlighted || false
+                    );
+                });
+
+            } else {
+
+                updateBackgroundStyles();
+                changeLanguage('en');
+
+                parsed.forEach(item => {
+                    spawnBubble(
+                        item.id,
+                        item.text,
+                        item.x,
+                        item.y,
+                        item.highlighted || false
+                    );
+                });
+            }
+        }
+
+        window.onload = loadThoughts;
+    </script>
+</body>
+</html>
